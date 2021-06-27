@@ -76,13 +76,6 @@ public:
             });
     }
     
-    bool Pfilter(const int& document_id, const DocumentStatus& status,const int& rating){ 
-        return status == DocumentStatus::ACTUAL;
-    }
-    
-    bool IsEven(int document_id, DocumentStatus status, int rating) {
-        return document_id % 2 == 0;
-    }
    
     vector<Document> FindTopDocuments(const string& raw_query) const {
          auto matched_documents = FindTopDocuments(raw_query, [](int document_id, DocumentStatus status, int rating) { return status == DocumentStatus::ACTUAL; });
