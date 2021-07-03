@@ -89,15 +89,9 @@ public:
         return matched_documents;
     }
     vector<Document> FindTopDocuments(const string& raw_query, DocumentStatus status_in) const {
-         auto matched_documents = FindTopDocuments(raw_query, [status_in](int document_id, DocumentStatus status, int rating) {
-             switch (status_in){
-                 case DocumentStatus::ACTUAL: return status == DocumentStatus::ACTUAL;
-                 case DocumentStatus::IRRELEVANT: return status == DocumentStatus::IRRELEVANT;
-                 case DocumentStatus::BANNED: return status == DocumentStatus::BANNED;
-                 case DocumentStatus::REMOVED: return status == DocumentStatus::REMOVED;
-             }
-             return status == DocumentStatus::ACTUAL;
-             });
+        auto matched_documents = FindTopDocuments(raw_query, [status_in](int document_id, DocumentStatus status, int rating) { 
+             return status == status_in;
+             }); 
         return matched_documents;
     }
     
