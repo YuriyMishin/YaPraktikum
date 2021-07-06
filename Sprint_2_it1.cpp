@@ -82,9 +82,9 @@ public:
         return matched_documents;
     }
     vector<Document> FindTopDocuments(const string& raw_query, DocumentStatus status_in) const {
-         auto matched_documents = FindTopDocuments(raw_query, [status_in](int document_id, DocumentStatus status, int rating) {
+        auto matched_documents = FindTopDocuments(raw_query, [status_in](int document_id, DocumentStatus status, int rating) { 
              return status == status_in;
-             });
+             }); 
         return matched_documents;
     }
     
@@ -92,11 +92,7 @@ public:
   vector<Document> FindTopDocuments(const string& raw_query,const PFilter pfilter) const {
         const Query query = ParseQuery(raw_query);
         vector <Document>  matched_documents;
-      for (auto document: FindAllDocuments(query)){
-          if (pfilter(document.id,documents_.at(document.id).status,document.rating)){
-              matched_documents.push_back(document);
-          }
-      }
+      matched_documents=FindAllDocuments(query, pfilter);
         sort(matched_documents.begin(), matched_documents.end(),
              [](const Document& lhs, const Document& rhs) {
                 if (abs(lhs.relevance - rhs.relevance) < 1e-6) {
@@ -216,7 +212,8 @@ private:
         return log(GetDocumentCount() * 1.0 / word_to_document_freqs_.at(word).size());
     }
 
-    vector<Document> FindAllDocuments(const Query& query) const {
+template <typename PFilter>
+    vector<Document> FindAllDocuments(const Query& query, PFilter pfilter) const {
         map<int, double> document_to_relevance;
         for (const string& word : query.plus_words) {
             if (word_to_document_freqs_.count(word) == 0) {
@@ -224,9 +221,10 @@ private:
             }
             const double inverse_document_freq = ComputeWordInverseDocumentFreq(word);
             for (const auto [document_id, term_freq] : word_to_document_freqs_.at(word)) {
-               // if (documents_.at(document_id).status == status) {
+                const auto& document_data = documents_.at(document_id);
+                if (pfilter(document_id,document_data.status,document_data.rating)){
                     document_to_relevance[document_id] += term_freq * inverse_document_freq;
-               // }
+                }
             }
         }
         
