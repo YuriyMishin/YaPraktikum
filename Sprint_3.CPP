@@ -111,9 +111,6 @@ public:
 
     explicit SearchServer(const string& stop_words_text)
         : SearchServer(SplitIntoWords(stop_words_text)) {
-            if (!IsValidWord(stop_words_text)){
-                throw invalid_argument("Запрос содержит спецсимволы");
-            }
         }
     
 
