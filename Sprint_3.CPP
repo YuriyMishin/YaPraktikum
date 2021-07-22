@@ -78,25 +78,6 @@ enum class DocumentStatus {
 };
 
 
-//####################################################################################################################################################
-// РЕЗЮМЕ ПО РЕШЕНИЮ ЗАДАЧИ!!!
-
-// Добавил выбрасывание исключений в методы:
-// AddDocument(int document_id, const string& document, DocumentStatus status, const vector<int>& ratings)
-// vector <string> SplitIntoWordsNoStop(const string& text)
-// QueryWord ParseQueryWord(string text)
-
-// Добавил перегрузку функции IsValidWord для возможности работы с контейнером строк
-//template <typename StringContainer>
-// static bool IsValidWord(const StringContainer& words)
-
-// Добавил выбрасывание исключений в конструкторы:
-//template <typename StringContainer>
-// explicit SearchServer(const StringContainer& stop_words)
-
-//explicit SearchServer(const string& stop_words_text)
-//####################################################################################################################################################
-
 
 class SearchServer {
 public:
@@ -104,7 +85,7 @@ public:
     template <typename StringContainer>
     explicit SearchServer(const StringContainer& stop_words)
         : stop_words_(MakeUniqueNonEmptyStrings(stop_words)) {
-            if (!IsValidWord(stop_words)){                              //Использовал добавленную перегрузку функции IsValidWord для возможности работать с контейнером
+            if (!IsValidWordInStringContainer(stop_words)){                              
                 throw invalid_argument("Запрос содержит спецсимволы");
             }
     }
@@ -116,7 +97,7 @@ public:
 
     void AddDocument(int document_id, const string& document, DocumentStatus status,
                                    const vector<int>& ratings) {
-        if ((document_id < 0) || (documents_.count(document_id) > 0) || !IsValidWord(document)) {   // Добавил выбрасывание исключений
+        if ((document_id < 0) || (documents_.count(document_id) > 0)) {   
             throw invalid_argument("Неверный id или документ содержит спецсимволы");
         }
         const vector<string> words = SplitIntoWordsNoStop(document);
@@ -164,11 +145,7 @@ public:
     }
 
     int GetDocumentId(int index) const {
-        if (index >= 0 && index < GetDocumentCount()) {
-            return document_ids_[index];
-        } else {
-        throw out_of_range("неверный id");
-        }
+        return document_ids_.at(index);
     }
 
     tuple<vector<string>, DocumentStatus> MatchDocument(const string& raw_query, int document_id) const {
@@ -212,24 +189,22 @@ private:
 
     static bool IsValidWord(const string& word) {
         // A valid word must not contain special characters
-        return none_of(word.begin(), word.end(), [](char c) {
+        return !any_of(word.begin(), word.end(), [](char c) {
             return c >= '\0' && c < ' ';
         });
     }
     
     template <typename StringContainer>
-    static bool IsValidWord(const StringContainer& words) {     // Перегрузка функции IsValidWord для возможности работы с контейнером строк
+    static bool IsValidWordInStringContainer(const StringContainer& words) {     
         for (const string& word : words){
-        if (!none_of(word.begin(), word.end(), [](char c) {
-            return c >= '\0' && c < ' ';
-        })) {
+        if (!IsValidWord(word)) {
             return false;
         }
         }
         return true;
     }
 
-    vector <string> SplitIntoWordsNoStop(const string& text) const {   // Добавил выбрасывание исключений
+    vector <string> SplitIntoWordsNoStop(const string& text) const { 
         vector<string> words;
         for (const string& word : SplitIntoWords(text)) {
             if (!IsValidWord(word)) {
@@ -262,7 +237,7 @@ private:
     QueryWord ParseQueryWord(string text) const {      // Добавил выбрасывание исключений
         
         if (text.empty()) {
-            throw invalid_argument("Неверный запрос");
+            throw invalid_argument("Запрос не может быть пустым");
         }
         bool is_minus = false;
         if (text[0] == '-') {
@@ -270,7 +245,7 @@ private:
             text = text.substr(1);
         }
         if (text.empty() || text[0] == '-' || !IsValidWord(text)) {
-            throw invalid_argument("Неверный запрос");
+            throw invalid_argument("Запрос не должен содержит спец. символы и начинаться с двух знаков --");
         }
 
         return QueryWord{text, is_minus, IsStopWord(text)};
