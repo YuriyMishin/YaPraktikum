@@ -17,9 +17,17 @@ template <typename Iterator>
 class Paginator {
 public:
     Paginator(Iterator begin, Iterator end, size_t page_size);
-    auto begin() const;
-    auto end() const;
-    size_t size() const;
+    auto begin() const {
+        return pages_.begin();
+    }
+    
+    auto end() const {
+        return pages_.end();
+    }
+    
+    size_t size() const {
+        return pages_.size();
+    }
 private:
     std::vector<IteratorRange<Iterator>> pages_;
 };
@@ -70,18 +78,7 @@ Paginator<Iterator>::Paginator(Iterator begin, Iterator end, size_t page_size) {
     }
 }
 
-template <typename Iterator>
-auto Paginator<Iterator>::begin() const {
-    return pages_.begin();
+template <typename Container>
+auto Paginate(const Container& c, size_t page_size) {
+    return Paginator(begin(c), end(c), page_size);
 }
-
-template <typename Iterator>
-auto Paginator<Iterator>::end() const {
-    return pages_.end();
-}
-
-template <typename Iterator>
-size_t Paginator<Iterator>::size() const {
-    return pages_.size();
-}
-
