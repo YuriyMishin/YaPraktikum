@@ -79,8 +79,9 @@ template <typename StringContainer>
 SearchServer::SearchServer(const StringContainer& stop_words)
 : stop_words_(MakeUniqueNonEmptyStrings(stop_words))
 {
+    using namespace std;
     if (!all_of(stop_words_.begin(), stop_words_.end(), IsValidWord)) {
-        throw std::invalid_argument("Some of stop words are invalid");
+        throw std::invalid_argument("Some of stop words are invalid"s);
     }
 }
 
@@ -136,8 +137,3 @@ std::vector<Document> SearchServer::FindAllDocuments(const Query& query, Documen
     return matched_documents;
 }
 
-
-template <typename Container>
-auto Paginate(const Container& c, size_t page_size) {
-    return Paginator(begin(c), end(c), page_size);
-}
