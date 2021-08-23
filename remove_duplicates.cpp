@@ -13,7 +13,7 @@ void RemoveDuplicates(SearchServer& search_server){
         auto next_document_data = search_server.GetWordFrequencies(document_id);
         is_duplicate = false;
         for (int document_num = 0; document_num < all_uniq_documents.size(); ++document_num){
-            const auto document_data = all_uniq_documents.at(document_num);
+            const auto& document_data = all_uniq_documents.at(document_num);
             
             if ((document_data.size() == next_document_data.size()) && std::equal(document_data.begin(), document_data.end(), next_document_data.begin(), [](const auto& lhs, const auto& rhs) {
                 return lhs.first == rhs.first;})) {
