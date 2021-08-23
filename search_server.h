@@ -26,10 +26,23 @@ public:
     std::vector<Document> FindTopDocuments(const std::string& raw_query, DocumentStatus status) const;
     std::vector<Document> FindTopDocuments(const std::string& raw_query) const;
     
+    using const_iterator=typename std::set<int>::const_iterator;
+    const_iterator begin() const  { return document_ids_.begin(); }
+    const_iterator end() const  { return document_ids_.end(); }
+    
     int GetDocumentCount() const;
-    int GetDocumentId(int index) const;
     
     std::tuple<std::vector<std::string>, DocumentStatus> MatchDocument(const std::string& raw_query, int document_id) const;
+    
+    const std::map<std::string, double>& GetWordFrequencies(int document_id) const {
+        return id_word_to_document_freqs_.at(document_id);
+    }
+    
+    void RemoveDocument(int document_id){
+        documents_.erase(document_id);
+        id_word_to_document_freqs_.erase(document_id);
+        document_ids_.erase(document_id);
+    }
     
 private:
     struct DocumentData {
@@ -37,9 +50,9 @@ private:
         DocumentStatus status;
     };
     const std::set<std::string> stop_words_;
-    std::map<std::string, std::map<int, double>> word_to_document_freqs_;
+    std::map<int, std::map<std::string, double>> id_word_to_document_freqs_;
     std::map<int, DocumentData> documents_;
-    std::vector<int> document_ids_;
+    std::set<int> document_ids_;
     
     bool IsStopWord(const std::string& word) const;
     static bool IsValidWord(const std::string& word);
@@ -65,6 +78,7 @@ private:
     template <typename DocumentPredicate>
     std::vector<Document> FindAllDocuments(const Query& query, DocumentPredicate document_predicate) const;
 };
+
 void PrintDocument(const Document& document);
 void PrintMatchDocumentResult(int document_id, const std::vector<std::string>& words, DocumentStatus status);
 void AddDocument(SearchServer& search_server, int document_id, const std::string& document, DocumentStatus status,
@@ -108,25 +122,29 @@ std::vector<Document> SearchServer::FindTopDocuments(const std::string& raw_quer
 template <typename DocumentPredicate>
 std::vector<Document> SearchServer::FindAllDocuments(const Query& query, DocumentPredicate document_predicate) const {
     std::map<int, double> document_to_relevance;
+    
     for (const std::string& word : query.plus_words) {
-        if (word_to_document_freqs_.count(word) == 0) {
-            continue;
-        }
-        const double inverse_document_freq = ComputeWordInverseDocumentFreq(word);
-        for (const auto [document_id, term_freq] : word_to_document_freqs_.at(word)) {
+        for (const auto& [document_id, word_to_document_freqs ] : id_word_to_document_freqs_){
+            if (word_to_document_freqs.count(word) == 0) {
+                continue;
+            }
+            
+            const double inverse_document_freq = ComputeWordInverseDocumentFreq(word);
             const auto& document_data = documents_.at(document_id);
+            
             if (document_predicate(document_id, document_data.status, document_data.rating)) {
-                document_to_relevance[document_id] += term_freq * inverse_document_freq;
+                document_to_relevance[document_id] += word_to_document_freqs.at(word) * inverse_document_freq;
             }
         }
     }
     
-    for (const std::string& word : query.minus_words) {
-        if (word_to_document_freqs_.count(word) == 0) {
-            continue;
-        }
-        for (const auto [document_id, _] : word_to_document_freqs_.at(word)) {
-            document_to_relevance.erase(document_id);
+    for (const int document_id : document_ids_){
+        for (const std::string& word : query.minus_words) {
+            if (id_word_to_document_freqs_.at(document_id).count(word) == 0) {
+                continue;
+            }else{
+                document_to_relevance.erase(document_id);
+            }
         }
     }
     
