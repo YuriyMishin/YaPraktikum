@@ -84,13 +84,18 @@ const std::map<std::string, double>& SearchServer::GetWordFrequencies(int docume
 void SearchServer::RemoveDocument(int document_id){
     if (document_ids_.count(document_id)){
         documents_.erase(document_id);
-        id_word_to_document_freqs_.erase(document_id);
         document_ids_.erase(document_id);
+        int count_word_in_doc = id_word_to_document_freqs_.at(document_id).size();
         for (auto [_, document_id_freq] : word_to_document_freqs_){
             if (document_id_freq.count(document_id)){
                 document_id_freq.erase(document_id);
+                --count_word_in_doc;
+            }
+            if (count_word_in_doc <= 0){
+                break;
             }
         }
+        id_word_to_document_freqs_.erase(document_id);
     }
 }
 
