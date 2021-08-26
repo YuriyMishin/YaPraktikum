@@ -86,7 +86,7 @@ void SearchServer::RemoveDocument(int document_id){
         documents_.erase(document_id);
         document_ids_.erase(document_id);
         for (auto [word, _] : id_word_to_document_freqs_.at(document_id)){
-            word_to_document_freqs_.erase(word);
+            word_to_document_freqs_.at(word).erase(document_id);
             }
         id_word_to_document_freqs_.erase(document_id);
     }
