@@ -199,14 +199,9 @@ public:
     }
     
     Iterator InsertAfter(ConstIterator pos, const Type& value) {
-        for (auto it = before_begin(); it!= end(); ++it){
-            if (it == pos){
-                it.node_->next_node = new Node(value, it.node_->next_node);
-                ++size_;
-                return Iterator(it.node_->next_node);
-            }
-        }
-        return {};
+        pos.node_->next_node = new Node(value, pos.node_->next_node);
+        ++size_;
+        return Iterator(pos.node_->next_node);
     }
     
     void PopFront() noexcept {
@@ -217,16 +212,11 @@ public:
     }
     
     Iterator EraseAfter(ConstIterator pos) noexcept {
-        for (auto it = before_begin(); it!= end(); ++it){
-            if (it == pos){
-                Node* temp = it.node_->next_node;
-                it.node_->next_node = temp->next_node;
-                --size_;
-                delete temp;
-                return Iterator(it.node_->next_node);
-            }
-        }
-        return {};
+        Node* temp = pos.node_->next_node;
+        pos.node_->next_node = temp->next_node;
+        --size_;
+        delete temp;
+        return Iterator(pos.node_->next_node);
     }
     
 private:
