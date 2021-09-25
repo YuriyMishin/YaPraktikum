@@ -6,18 +6,9 @@ class ArrayPtr {
 public:
     ArrayPtr() = default;
     
-    explicit ArrayPtr(size_t size) {
-        if (size){
-            raw_ptr_ = new Type [size]{};
-        } else {
-            raw_ptr_ = nullptr;
-        }
-    }
+    explicit ArrayPtr(size_t size) :  raw_ptr_(nullptr) {if (size) { raw_ptr_ = new Type [size]{};} }
     
-    explicit ArrayPtr(Type* raw_ptr) noexcept {
-        raw_ptr_ = raw_ptr;
-        
-    }
+    explicit ArrayPtr(Type* raw_ptr) noexcept : raw_ptr_(raw_ptr){}
     
     ArrayPtr(const ArrayPtr&) = delete;
     
