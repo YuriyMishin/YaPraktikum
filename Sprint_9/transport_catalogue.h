@@ -28,7 +28,6 @@ namespace tc {
 
     struct Bus {
         std::string name;
-        bool is_ring = false;
         std::vector<Stop*> route;
         BusInfo info;
     };
