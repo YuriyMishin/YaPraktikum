@@ -4,7 +4,7 @@
 #include "stat_reader.h"
 
 namespace tc::detail {
-    void AnswerBus(std::ostream &output, std::string &bus_name, tc::TransportCatalogue &transport_catalogue) {
+    void PrintBusInfo(std::ostream &output, std::string &bus_name, tc::TransportCatalogue &transport_catalogue) {
         output << "Bus " << bus_name << ": ";
         const Bus *bus = transport_catalogue.GetBus(bus_name);
         if (!bus) {
@@ -19,7 +19,7 @@ namespace tc::detail {
         }
     }
 
-    void AnswerStop(std::ostream &output, std::string &stop_name, tc::TransportCatalogue &transport_catalogue) {
+    void PrintStopInfo(std::ostream &output, std::string &stop_name, tc::TransportCatalogue &transport_catalogue) {
         output << "Stop " << stop_name << ": ";
         const Stop *stop = transport_catalogue.GetStop(stop_name);
         if (!stop) {
@@ -53,10 +53,10 @@ std::ostream& operator << (std::ostream& output, tc::TransportCatalogue& transpo
         getline(std::cin, query);
         TrimStr(query);
         if (command == "Bus") {
-            AnswerBus(output, query, transport_catalogue);
+            PrintBusInfo(output, query, transport_catalogue);
         }
         else if (command == "Stop") {
-            AnswerStop(output, query, transport_catalogue);
+            PrintStopInfo(output, query, transport_catalogue);
         }
     }
     return output;
