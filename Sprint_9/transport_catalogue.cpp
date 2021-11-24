@@ -6,14 +6,14 @@
 namespace tc {
 
     void TransportCatalogue::AddStop(const Stop& stop) {
-        Stop* finded_stop = GetStop(stop.name);
-        if (!finded_stop) {
+        Stop* found_stop = GetStop(stop.name);
+        if (!found_stop) {
             auto ptr_stop = &*stops_.emplace(stops_.end(), stop);
             index_stops_[ptr_stop->name] = ptr_stop;
             buses_for_stops_[ptr_stop];
         }
         else {
-            *finded_stop = { stop.name, stop.coordinates };
+            *found_stop = { stop.name, stop.coordinates };
         }
     }
 
@@ -74,7 +74,6 @@ namespace tc {
     }
 
     int TransportCatalogue::GetDistanceBetweenStops(const std::string& stop1, const std::string& stop2) const {
-
         return distance_between_stops_.at({GetStop(stop1), GetStop(stop2)});
     }
 
